@@ -23,7 +23,7 @@ impl Operation for MulTwo {
 
 #[inline(never)]
 fn dynamic_call(op: &dyn Operation, x: i64) -> i64 {
-    op.apply(x)
+    op.apply(x) + op.apply(x)
 }
 
 #[inline(never)]
