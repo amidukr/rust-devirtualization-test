@@ -1,6 +1,8 @@
 use std::hint::black_box;
 
 trait Operation {
+    fn another(&self) -> i64;
+
     fn apply(&self, x: i64) -> i64;
 }
 
@@ -9,12 +11,22 @@ struct MulTwo;
 
 impl Operation for AddOne {
     #[inline(never)]
+    fn another(&self) -> i64 {
+        1
+    }
+
+    #[inline(never)]
     fn apply(&self, x: i64) -> i64 {
         x + 1
     }
 }
 
 impl Operation for MulTwo {
+    #[inline(never)]
+    fn another(&self) -> i64 {
+        2
+    }
+
     #[inline(never)]
     fn apply(&self, x: i64) -> i64 {
         x * 2
@@ -23,7 +35,7 @@ impl Operation for MulTwo {
 
 #[inline(never)]
 fn dynamic_call(op: &dyn Operation, x: i64) -> i64 {
-    op.apply(x) + 1
+    op.apply(x) + op.another()
 }
 
 #[inline(never)]
