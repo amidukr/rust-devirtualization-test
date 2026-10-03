@@ -5,6 +5,7 @@ trait Operation {
 }
 
 struct AddOne;
+struct MulTwo;
 
 impl Operation for AddOne {
     #[inline(never)]
@@ -13,9 +14,26 @@ impl Operation for AddOne {
     }
 }
 
+impl Operation for MulTwo {
+    #[inline(never)]
+    fn apply(&self, x: i64) -> i64 {
+        x * 2
+    }
+}
+
 #[inline(never)]
 fn dynamic_call(op: &dyn Operation, x: i64) -> i64 {
     op.apply(x)
+}
+
+#[inline(never)]
+fn not_devirtualizable(condition: bool, x: i64) -> i64 {
+    let add = AddOne;
+    let mul = MulTwo;
+
+    let op: &dyn Operation = if condition { &add } else { &mul };
+
+    dynamic_call(op, x)
 }
 
 #[inline(never)]
@@ -29,5 +47,9 @@ fn devirtualizable(x: i64) -> i64 {
 }
 
 fn main() {
-    println!("{}", devirtualizable(black_box(41)));
+    let x = black_box(41);
+
+    println!("{}", devirtualizable(x));
+
+    println!("{}", not_devirtualizable(black_box(true), x));
 }
