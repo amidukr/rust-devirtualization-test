@@ -26,7 +26,20 @@ The static version is monomorphized and allows the trait method to be inlined in
 
 The dynamic version is deliberately kept across a crate boundary with LTO disabled, forcing a real vtable dispatch.
 
+## Running the benchmark
+
+Clone the repository and run the benchmark in release mode:
+
+```bash
+git clone https://github.com/amidukr/rust-devirtualization-test.git
+cd rust-devirtualization-test
+cargo run --release -p devirtualization-test-main
+```
+
 On the test machine, the resulting benchmark is approximately:
+
+- CPU: 2th Gen Intel(R) Core(TM) i7-1255U
+- Power Mode: Balanced
 
 ```text
 Iterations: 1000000000
