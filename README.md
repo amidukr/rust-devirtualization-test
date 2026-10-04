@@ -40,6 +40,7 @@ On the test machine, the resulting benchmark is approximately:
 
 - CPU: 12th Gen Intel(R) Core(TM) i7-1255U (Low-Power Laptop CPU)
 - Power Mode: Balanced
+- OS: Linux, kernel 7.0.0
 
 ```text
 Iterations: 1000000000
