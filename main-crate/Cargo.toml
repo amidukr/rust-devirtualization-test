@@ -1,0 +1,7 @@
+[package]
+name = "devirtualization-test-main"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+devirtualization-test-lib = { path = "../lib-crate/" }

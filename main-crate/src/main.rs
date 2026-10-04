@@ -1,10 +1,6 @@
 use std::hint::black_box;
 
-trait Operation {
-    fn another(&self) -> i64;
-
-    fn apply(&self, x: i64) -> i64;
-}
+use devirtualization_test_lib::{Operation, dynamic_call};
 
 struct AddOne;
 struct MulTwo;
@@ -31,11 +27,6 @@ impl Operation for MulTwo {
     fn apply(&self, x: i64) -> i64 {
         x * 2
     }
-}
-
-#[inline(never)]
-fn dynamic_call(op: &dyn Operation, x: i64) -> i64 {
-    op.apply(x) + op.another()
 }
 
 #[inline(never)]

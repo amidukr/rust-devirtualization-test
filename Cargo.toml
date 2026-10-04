@@ -1,6 +1,6 @@
-[package]
-name = "devirtualization-test"
-version = "0.1.0"
-edition = "2024"
+[workspace]
+resolver = "3"
+members = ["lib-crate", "main-crate"]
 
-[dependencies]
+[profile.release]
+lto = false

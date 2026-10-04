@@ -3,12 +3,5 @@
 version = 4
 
 [[package]]
-name = "devirtualization-test-lib"
-version = "0.1.0"
-
-[[package]]
 name = "devirtualization-test-main"
 version = "0.1.0"
-dependencies = [
- "devirtualization-test-lib",
-]
