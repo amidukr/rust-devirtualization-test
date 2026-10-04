@@ -38,7 +38,7 @@ cargo run --release -p devirtualization-test-main
 
 On the test machine, the resulting benchmark is approximately:
 
-- CPU: 2th Gen Intel(R) Core(TM) i7-1255U
+- CPU: 12th Gen Intel(R) Core(TM) i7-1255U (Low-Power Laptop CPU)
 - Power Mode: Balanced
 
 ```text
