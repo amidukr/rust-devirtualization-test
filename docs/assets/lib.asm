@@ -13,28 +13,54 @@ _RNvCs85WuWpnC3RJ_25devirtualization_test_lib16dynamic_dispatch:
 	.cfi_def_cfa_offset 16
 	push	r14
 	.cfi_def_cfa_offset 24
-	push	rbx
+	push	r13
 	.cfi_def_cfa_offset 32
-	.cfi_offset rbx, -32
+	push	r12
+	.cfi_def_cfa_offset 40
+	push	rbx
+	.cfi_def_cfa_offset 48
+	sub	rsp, 32
+	.cfi_def_cfa_offset 80
+	.cfi_offset rbx, -48
+	.cfi_offset r12, -40
+	.cfi_offset r13, -32
 	.cfi_offset r14, -24
 	.cfi_offset r15, -16
 	mov	rbx, rcx
-	mov	r14, rdi
-	mov	r15, qword ptr [rsi + 24]
+	mov	r14, rsi
+	mov	r15, rdi
+	lea	r12, [rsp + 16]
+	lea	r13, [rsp + 8]
 	.p2align	4
 .LBB0_2:
-	mov	rdi, r14
-	mov	rsi, rax
-	call	r15
+	mov	qword ptr [rsp + 16], r15
+	mov	qword ptr [rsp + 24], r14
+	#APP
+	#NO_APP
+	mov	qword ptr [rsp + 8], rax
+	#APP
+	#NO_APP
+	mov	rdi, qword ptr [rsp + 16]
+	mov	rax, qword ptr [rsp + 24]
+	mov	rsi, qword ptr [rsp + 8]
+	call	qword ptr [rax + 24]
 	dec	rbx
 	jne	.LBB0_2
+	add	rsp, 32
+	.cfi_def_cfa_offset 48
 	pop	rbx
+	.cfi_def_cfa_offset 40
+	pop	r12
+	.cfi_def_cfa_offset 32
+	pop	r13
 	.cfi_def_cfa_offset 24
 	pop	r14
 	.cfi_def_cfa_offset 16
 	pop	r15
 	.cfi_def_cfa_offset 8
 	.cfi_restore rbx
+	.cfi_restore r12
+	.cfi_restore r13
 	.cfi_restore r14
 	.cfi_restore r15
 .LBB0_4:

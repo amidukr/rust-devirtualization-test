@@ -23,7 +23,7 @@ pub fn static_dispatch<T: Operation>(op: &T, mut x: i64, iterations: u64) -> i64
 #[inline(never)]
 pub fn dynamic_dispatch(op: &dyn Operation, mut x: i64, iterations: u64) -> i64 {
     for _ in 0..iterations {
-        x = op.apply(x);
+        x = std::hint::black_box(op).apply(std::hint::black_box(x));
     }
 
     x
