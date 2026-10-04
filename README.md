@@ -52,9 +52,9 @@ run 4: static =  215.065 ms | dynamic = 1062.438 ms | dynamic/static = 4.94x
 run 5: static =  216.695 ms | dynamic = 1070.522 ms | dynamic/static = 4.94x
 ```
 
-In this experiment, dynamic dispatch is therefore roughly **3.5× slower** than the statically dispatched and inlined version.
+In this experiment, dynamic dispatch is therefore roughly **4.9× slower** than the statically dispatched and inlined version.
 
-This is a deliberately small microbenchmark. It should not be interpreted as saying that Rust programs using `dyn Trait` are generally 3.5× slower. The purpose is to make the generated machine-code difference easy to observe.
+This is a deliberately small microbenchmark. It should not be interpreted as saying that Rust programs using `dyn Trait` are generally 4.9× slower. The purpose is to make the generated machine-code difference easy to observe.
 
 ## Project structure
 
@@ -118,7 +118,7 @@ pub fn static_dispatch<T: Operation>(
     iterations: u64,
 ) -> i64 {
     for _ in 0..iterations {
-        x = op.apply(std::hint::black_box(x));
+        x = std::hint::black_box(op).apply(std::hint::black_box(x));
     }
 
     x
@@ -232,12 +232,12 @@ That would make the benchmark meaningless.
 Instead, the benchmark uses:
 
 ```rust
-x = op.apply(std::hint::black_box(x));
+x = std::hint::black_box(op).apply(std::hint::black_box(x));
 ```
 
-The value of `x` becomes opaque to the optimizer on each iteration, preventing LLVM from collapsing the iterations into one addition.
+The value of `x` becomes opaque to the optimizer on each iteration, preventing LLVM from collapsing the iterations into one addition. `op` is also made opaque so the static and dynamic benchmark loops use the same source-level barrier pattern.
 
-At the same time, `apply()` itself remains visible to the optimizer and can still be inlined.
+For the generic static version, the concrete implementation is still known after monomorphization, so `apply()` can be inlined.
 
 This gives us the behavior we want:
 
@@ -259,7 +259,7 @@ pub fn dynamic_dispatch(
     iterations: u64,
 ) -> i64 {
     for _ in 0..iterations {
-        x = op.apply(x);
+        x = std::hint::black_box(op).apply(std::hint::black_box(x));
     }
 
     x
@@ -282,74 +282,36 @@ RDX = x
 RCX = iterations
 ```
 
-The optimized library assembly is:
+The optimized hot loop is:
 
 ```asm
-mov     rax, rdx
-test    rcx, rcx
-je      .LBB0_4
-
-push    r15
-push    r14
-push    rbx
-
-mov     rbx, rcx
-mov     r14, rdi
-
-mov     r15, qword ptr [rsi + 24]
-
-.p2align 4
-
 .LBB0_2:
-mov     rdi, r14
-mov     rsi, rax
-call    r15
-dec     rbx
-jne     .LBB0_2
+    mov     qword ptr [rsp + 16], r15
+    mov     qword ptr [rsp + 24], r14
 
-pop     rbx
-pop     r14
-pop     r15
+    # black_box(op) compiler barrier
 
-.LBB0_4:
-ret
+    mov     qword ptr [rsp + 8], rax
+
+    # black_box(x) compiler barrier
+
+    mov     rdi, qword ptr [rsp + 16]
+    mov     rax, qword ptr [rsp + 24]
+    mov     rsi, qword ptr [rsp + 8]
+    call    qword ptr [rax + 24]
+    dec     rbx
+    jne     .LBB0_2
 ```
 
-The key instructions are:
+The key instruction is:
 
 ```asm
-mov r15, qword ptr [rsi + 24]
+call qword ptr [rax + 24]
 ```
 
-followed by:
+At that point `rax` contains the vtable pointer. The call therefore reads the `Operation::apply` function pointer from the vtable and calls it indirectly.
 
-```asm
-call r15
-```
-
-`RSI` contains the vtable pointer.
-
-Therefore:
-
-```asm
-mov r15, qword ptr [rsi + 24]
-```
-
-loads the `Operation::apply` function pointer from the vtable.
-
-LLVM then keeps that function pointer in `r15`.
-
-This is worth noting: the compiler has already optimized the vtable lookup **out of the loop**.
-
-It does not execute:
-
-```asm
-call qword ptr [vtable + 24]
-```
-
-one billion times.
-
-Instead, it effectively performs:
+`black_box(op)` is deliberately inside the loop. Without it, LLVM can hoist the vtable method pointer out of the loop and reduce the hot path to something like:
 
 ```asm
 mov r15, qword ptr [vtable + 24]
@@ -358,15 +320,9 @@ mov r15, qword ptr [vtable + 24]
     call r15
 ```
 
-The dynamic version is therefore already reasonably optimized.
+That is a valid optimization, but it no longer measures the vtable lookup itself on every iteration. Making the trait object opaque each iteration keeps the benchmark focused on an actual vtable-based call.
 
-What LLVM cannot do without devirtualizing the call is replace:
-
-```asm
-call r15
-```
-
-with the actual implementation.
+Similarly, `black_box(x)` prevents LLVM from recognizing the repeated `x + 1` operation and collapsing the entire loop into a single addition.
 
 ## The called implementation
 
@@ -377,58 +333,34 @@ lea     rax, [rsi + 1]
 ret
 ```
 
-So the dynamic hot path is effectively:
+So the dynamic path performs a vtable lookup, an indirect call, the tiny operation, and a return on every iteration.
+
+The static path can inline the same operation directly into the loop as:
 
 ```asm
-.loop:
-    mov     rdi, r14
-    mov     rsi, rax
-    call    r15
-
-        ; AddOne::apply
-        lea     rax, [rsi + 1]
-        ret
-
-    dec     rbx
-    jne     .loop
-```
-
-while static dispatch has effectively become:
-
-```asm
-.loop:
-    ; black_box barrier
-    inc     rax
-    dec     rsi
-    jne     .loop
+inc rax
 ```
 
 That is the core of this experiment.
 
 ## Static vs dynamic assembly
 
-Ignoring the `black_box` compiler barrier, the hot loops can be summarized as:
+Ignoring the compiler-barrier bookkeeping, the essential difference is:
 
 ```text
 STATIC                           DYNAMIC
 
-                                mov rdi, r14
-                                mov rsi, rax
-inc rax                         call r15
-                                    lea rax, [rsi + 1]
-                                    ret
+inc rax                          call qword ptr [vtable + 24]
+                                     lea rax, [rsi + 1]
+                                     ret
 
-dec rsi                         dec rbx
-jne loop                        jne loop
+dec ...                          dec ...
+jne loop                         jne loop
 ```
 
-Static dispatch allows `AddOne::apply` to become part of the caller.
+Static dispatch allows `AddOne::apply` to become part of the caller. Dynamic dispatch preserves a runtime-selected function-call boundary and, in this version of the benchmark, performs the vtable method lookup on each iteration.
 
-Dynamic dispatch preserves a function-call boundary.
-
-The cost is therefore not merely a vtable memory lookup. In this example LLVM already hoists the vtable lookup outside the loop.
-
-The important remaining difference is that static dispatch enables the operation itself to be **inlined and optimized together with its caller**, while dynamic dispatch requires an indirect call and return on every iteration.
+The benchmark intentionally makes both `op` and `x` opaque inside the loop: `black_box(op)` prevents LLVM from hoisting the dynamic method pointer, while `black_box(x)` prevents it from algebraically eliminating the loop.
 
 ## A note about GOT calls
 
@@ -451,9 +383,7 @@ dynamic_dispatch
 The actual trait dispatch occurs later, inside that function:
 
 ```asm
-mov     r15, qword ptr [rsi + 24]
-...
-call    r15
+call qword ptr [rax + 24]
 ```
 
 This distinction is important when looking for dynamic dispatch in generated assembly.
@@ -480,27 +410,9 @@ call qword ptr [rbx + 24]
 
 can represent a runtime-selected call target.
 
-## Running the benchmark
+## Compiler version
 
-Build and run the release version from the workspace root:
-
-```bash
-cargo run --release -p devirtualization-test-main
-```
-
-Example output:
-
-```text
-Iterations: 1000000000
-
-run 1: static =  261.645 ms | dynamic =  867.913 ms | dynamic/static = 3.32x
-run 2: static =  251.855 ms | dynamic =  871.570 ms | dynamic/static = 3.46x
-run 3: static =  245.499 ms | dynamic =  869.815 ms | dynamic/static = 3.54x
-run 4: static =  253.843 ms | dynamic =  874.743 ms | dynamic/static = 3.45x
-run 5: static =  242.746 ms | dynamic =  871.301 ms | dynamic/static = 3.59x
-```
-
-Results will vary by CPU, operating system, compiler version, CPU frequency scaling, and system load.
+Results will vary by CPU, operating system, compiler version, CPU frequency scaling, core placement, and system load.
 
 The assembly shown in this repository was generated with:
 
@@ -603,9 +515,7 @@ With dynamic dispatch:
 ```text
 dyn Trait
     ↓
-vtable
-    ↓
-function pointer
+vtable method slot
     ↓
 indirect call
     ↓
