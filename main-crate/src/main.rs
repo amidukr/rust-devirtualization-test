@@ -1,58 +1,47 @@
 use std::hint::black_box;
+use std::time::Instant;
 
-use devirtualization_test_lib::{Operation, dynamic_call};
+use devirtualization_test_lib::{AddOne, dynamic_dispatch, static_dispatch};
 
-struct AddOne;
-struct MulTwo;
-
-impl Operation for AddOne {
-    #[inline(never)]
-    fn another(&self) -> i64 {
-        1
-    }
-
-    #[inline(never)]
-    fn apply(&self, x: i64) -> i64 {
-        x + 1
-    }
-}
-
-impl Operation for MulTwo {
-    #[inline(never)]
-    fn another(&self) -> i64 {
-        2
-    }
-
-    #[inline(never)]
-    fn apply(&self, x: i64) -> i64 {
-        x * 2
-    }
-}
-
-#[inline(never)]
-fn not_devirtualizable(condition: bool, x: i64) -> i64 {
-    let add = AddOne;
-    let mul = MulTwo;
-
-    let op: &dyn Operation = if condition { &add } else { &mul };
-
-    dynamic_call(op, x)
-}
-
-#[inline(never)]
-fn devirtualizable(x: i64) -> i64 {
-    let op = AddOne;
-
-    // We explicitly create a trait object.
-    let op: &dyn Operation = &op;
-
-    dynamic_call(op, x)
-}
+const ITERATIONS: u64 = 1_000_000_000;
+const RUNS: usize = 5;
 
 fn main() {
-    let x = black_box(41);
+    let op = AddOne;
 
-    println!("{}", devirtualizable(x));
+    println!("Iterations: {ITERATIONS}");
+    println!();
 
-    println!("{}", not_devirtualizable(black_box(true), x));
+    for run in 1..=RUNS {
+        // Static dispatch
+        let start = Instant::now();
+
+        let static_result = black_box(static_dispatch(
+            black_box(&op),
+            black_box(0),
+            black_box(ITERATIONS),
+        ));
+
+        let static_time = start.elapsed();
+
+        // Dynamic dispatch
+        let start = Instant::now();
+
+        let dynamic_result = black_box(dynamic_dispatch(
+            black_box(&op),
+            black_box(0),
+            black_box(ITERATIONS),
+        ));
+
+        let dynamic_time = start.elapsed();
+
+        assert_eq!(static_result, dynamic_result);
+
+        println!(
+            "run {run}: static = {:8.3} ms | dynamic = {:8.3} ms | dynamic/static = {:.2}x",
+            static_time.as_secs_f64() * 1000.0,
+            dynamic_time.as_secs_f64() * 1000.0,
+            dynamic_time.as_secs_f64() / static_time.as_secs_f64(),
+        );
+    }
 }
