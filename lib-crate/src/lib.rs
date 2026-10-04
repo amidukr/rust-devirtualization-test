@@ -14,7 +14,7 @@ impl Operation for AddOne {
 #[inline(never)]
 pub fn static_dispatch<T: Operation>(op: &T, mut x: i64, iterations: u64) -> i64 {
     for _ in 0..iterations {
-        x = op.apply(x);
+        x = op.apply(std::hint::black_box(x));
     }
 
     x
