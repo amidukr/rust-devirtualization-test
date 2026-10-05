@@ -1,30 +1,36 @@
-# Rust Static vs Dynamic Dispatch Benchmark
+# Rust Static, Devirtualized, and Dynamic Dispatch Benchmark
 
 <p align="center">
   <img src="docs/assets/benchmark.png"
-       alt="Rust static vs dynamic dispatch benchmark"
+       alt="Rust static, devirtualized, and dynamic dispatch benchmark"
        width="100%">
 </p>
 
-A small experiment demonstrating the difference between **static trait dispatch** and **dynamic trait dispatch** in optimized Rust code.
+A small experiment demonstrating three forms of trait dispatch in optimized Rust code:
 
-The benchmark uses the same trait operation in two forms:
+1. **Static dispatch** through `&T`
+2. **Dynamic dispatch that LLVM can devirtualize** through `&dyn Operation`
+3. **Forced dynamic dispatch** where the trait object is deliberately hidden from the optimizer
 
-Inlined and monomorphized:
-
-```rust
-&T
-```
-
-and vtable dynamic dispatch:
+All three execute the same operation:
 
 ```rust
-&dyn Operation
+x + 1
 ```
 
-The static version is monomorphized and allows the trait method to be inlined into the benchmark loop.
+The interesting question is what remains after optimization.
 
-The dynamic version is deliberately kept across a crate boundary with LTO disabled, forcing a real vtable dispatch.
+The experiment shows an important distinction:
+
+```text
+Rust source                         Optimized hot loop
+
+&T                                  inc
+&dyn Operation, devirtualized       inc
+&dyn Operation, kept opaque         vtable lookup + indirect call
+```
+
+In other words, `&dyn Trait` in Rust source does **not** necessarily mean that dynamic dispatch survives into the generated machine code.
 
 ## Running the benchmark
 
@@ -36,11 +42,13 @@ cd rust-devirtualization-test
 cargo run --release -p devirtualization-test-main
 ```
 
-On the test machine, the resulting benchmark is approximately:
+On the test machine:
 
 - CPU: 12th Gen Intel(R) Core(TM) i7-1255U (Low-Power Laptop CPU)
 - Power Mode: Balanced
 - OS: Linux, kernel 7.0.0
+
+A representative run is:
 
 ```text
 Iterations: 1000000000
@@ -52,9 +60,11 @@ run 4: static =  218.246 ms | devirt =  217.251 | dynamic = 1079.808 ms | dynami
 run 5: static =  218.090 ms | devirt =  219.331 | dynamic = 1056.841 ms | dynamic/static = 4.85x
 ```
 
-In this experiment, dynamic dispatch is therefore roughly **4.9× slower** than the statically dispatched and inlined version.
+The statically dispatched and devirtualized versions have essentially the same performance. The deliberately forced dynamic version is roughly **4.9× slower** in this particular microbenchmark.
 
-This is a deliberately small microbenchmark. It should not be interpreted as saying that Rust programs using `dyn Trait` are generally 4.9× slower. The purpose is to make the generated machine-code difference easy to observe.
+This should **not** be interpreted as saying that Rust programs using `dyn Trait` are generally 4.9× slower. The operation being dispatched here is deliberately tiny, so dispatch machinery is a large fraction of the total work.
+
+The purpose of the benchmark is to make the generated machine-code differences easy to observe.
 
 ## Project structure
 
@@ -64,6 +74,7 @@ This is a deliberately small microbenchmark. It should not be interpreted as say
 ├── Cargo.toml
 ├── docs
 │   └── assets
+│       ├── benchmark.png
 │       ├── lib.asm
 │       └── main.asm
 ├── lib-crate
@@ -79,11 +90,18 @@ This is a deliberately small microbenchmark. It should not be interpreted as say
 
 The experiment is split into two crates intentionally.
 
-`lib-crate` contains the trait and the dynamic dispatch function. `main-crate` contains the concrete implementation and invokes the benchmark.
+`lib-crate` contains the trait and dispatch functions. `main-crate` contains the benchmark wrappers and calls them with the concrete `AddOne` implementation.
 
-Keeping `dynamic_dispatch` in another crate while building without LTO prevents LLVM from seeing enough information to devirtualize the `dyn Operation` call.
+The workspace builds with LTO disabled:
 
-The generic static version is different. Rust monomorphizes the generic function for the concrete `AddOne` type, allowing LLVM to optimize it specifically for that implementation.
+```toml
+[profile.release]
+lto = false
+```
+
+The dispatch functions themselves are marked `#[inline(always)]`, which allows their bodies to be optimized in the caller when the compiler has enough information.
+
+The benchmark wrappers are marked `#[inline(never)]` so that the three benchmark cases remain easy to identify in the generated assembly.
 
 ## The trait
 
@@ -104,76 +122,80 @@ impl Operation for AddOne {
 }
 ```
 
-The simplicity is intentional: it makes the dispatch overhead and generated assembly easy to see.
+The simplicity is intentional.
 
-## Static dispatch
+When the operation itself is only `x + 1`, the difference between an inlined operation and a runtime-selected function call is easy to see.
+
+The separately callable implementation is essentially:
+
+```asm
+lea rax, [rsi + 1]
+ret
+```
+
+On x86-64 System V, `rsi` contains the `x` argument for this method and `rax` is the return register.
+
+`lea` does not dereference memory here. The instruction simply computes:
+
+```text
+rax = rsi + 1
+```
+
+## The three dispatch cases
+
+### 1. Static dispatch
 
 The static version is generic:
 
 ```rust
-#[inline(never)]
+#[inline(always)]
 pub fn static_dispatch<T: Operation>(
     op: &T,
     mut x: i64,
     iterations: u64,
 ) -> i64 {
     for _ in 0..iterations {
-        x = std::hint::black_box(op).apply(std::hint::black_box(x));
+        x = op.apply(std::hint::black_box(x));
     }
 
     x
 }
 ```
 
-At the Rust source level this function works with any `T: Operation`.
+At the Rust source level, this works with any `T: Operation`.
 
-At the machine-code level, however, Rust generates a specialized version for the concrete type used by the caller:
+For this benchmark the caller uses `AddOne`, so Rust monomorphizes the generic code for that concrete type.
 
-```text
-static_dispatch::<AddOne>
-```
-
-This can be seen directly in the mangled symbol name:
+Conceptually:
 
 ```text
-_RINvCs85WuWpnC3RJ_25devirtualization_test_lib15static_dispatchNtB2_6AddOneECsgqu5hhwAJIh_26devirtualization_test_main
+static_dispatch<T>
+        ↓
+static_dispatch<AddOne>
+        ↓
+AddOne::apply is known
+        ↓
+inline x + 1
 ```
 
-The important pieces embedded in the symbol are:
-
-```text
-devirtualization_test_lib
-static_dispatch
-AddOne
-```
-
-The resulting optimized assembly is:
+The hot loop becomes approximately:
 
 ```asm
-mov     rax, rdi
-test    rsi, rsi
-je      .LBB0_3
-lea     rcx, [rsp - 8]
-.p2align 4
+.Lloop:
+    mov     qword ptr [rsp], r14
 
-.LBB0_2:
-mov     qword ptr [rsp - 8], rax
+    # black_box(x)
 
-# black_box compiler barrier
-
-mov     rax, qword ptr [rsp - 8]
-inc     rax
-dec     rsi
-jne     .LBB0_2
-
-.LBB0_3:
-ret
+    mov     r14, qword ptr [rsp]
+    inc     r14
+    dec     rax
+    jne     .Lloop
 ```
 
 The important instruction is:
 
 ```asm
-inc rax
+inc r14
 ```
 
 That is the complete inlined implementation of:
@@ -182,125 +204,141 @@ That is the complete inlined implementation of:
 op.apply(x)
 ```
 
-for:
+There is no function call, function pointer lookup, or vtable lookup in the hot loop.
+
+### 2. Dynamic dispatch that can be devirtualized
+
+The second version accepts a trait object:
 
 ```rust
-AddOne::apply(x)
-```
-
-There is no function call, function pointer, or vtable lookup in the hot loop.
-
-The concrete type is known, so the compiler has transformed:
-
-```rust
-op.apply(x)
-```
-
-into essentially:
-
-```rust
-x += 1;
-```
-
-### Why `black_box` is inside the loop
-
-Without `black_box`, LLVM can optimize the entire loop away.
-
-For example:
-
-```rust
-for _ in 0..iterations {
-    x = x + 1;
-}
-```
-
-is mathematically equivalent to:
-
-```rust
-x + iterations
-```
-
-LLVM recognizes this and can reduce one billion iterations to approximately:
-
-```asm
-lea rax, [rdi + rsi]
-ret
-```
-
-That would make the benchmark meaningless.
-
-Instead, the benchmark uses:
-
-```rust
-x = std::hint::black_box(op).apply(std::hint::black_box(x));
-```
-
-The value of `x` becomes opaque to the optimizer on each iteration, preventing LLVM from collapsing the iterations into one addition. `op` is also made opaque so the static and dynamic benchmark loops use the same source-level barrier pattern.
-
-For the generic static version, the concrete implementation is still known after monomorphization, so `apply()` can be inlined.
-
-This gives us the behavior we want:
-
-```asm
-inc rax
-```
-
-executed once per iteration.
-
-## Dynamic dispatch
-
-The dynamic version operates on a trait object:
-
-```rust
-#[inline(never)]
-pub fn dynamic_dispatch(
+#[inline(always)]
+pub fn dynamic_dispatch_devirt(
     op: &dyn Operation,
     mut x: i64,
     iterations: u64,
 ) -> i64 {
     for _ in 0..iterations {
-        x = std::hint::black_box(op).apply(std::hint::black_box(x));
+        x = op.apply(std::hint::black_box(x));
     }
 
     x
 }
 ```
 
-Because `&dyn Operation` is a trait object, the function effectively receives two pointers:
+This is important: at the Rust type level, `op` really is:
+
+```rust
+&dyn Operation
+```
+
+So the source code contains dynamic dispatch.
+
+However, the benchmark calls this function with a concrete `&AddOne`:
+
+```rust
+let result = dynamic_dispatch_devirt(op, 0, ITERATIONS);
+```
+
+and `dynamic_dispatch_devirt` is marked:
+
+```rust
+#[inline(always)]
+```
+
+Inlining exposes the surrounding caller context to the optimizer. LLVM can see where the trait object came from and determine that the concrete implementation is `AddOne`.
+
+It can therefore transform:
+
+```text
+&AddOne
+    ↓
+&dyn Operation
+    ↓
+op.apply(x)
+```
+
+back into effectively:
+
+```text
+AddOne::apply(x)
+```
+
+and then inline `AddOne::apply()` itself.
+
+The resulting hot loop is effectively the same as the static version:
+
+```asm
+.Lloop:
+    mov     qword ptr [rsp], r14
+
+    # black_box(x)
+
+    mov     r14, qword ptr [rsp]
+    inc     r14
+    dec     rax
+    jne     .Lloop
+```
+
+Again, the important part is:
+
+```asm
+inc r14
+```
+
+There is no indirect call left.
+
+This is **devirtualization**: a call that is dynamic at the source level has been resolved to a concrete implementation during optimization.
+
+The benchmark result reflects this: the static and devirtualized versions take approximately the same amount of time.
+
+### 3. Forced dynamic dispatch
+
+The third version also accepts `&dyn Operation`, but deliberately makes the trait object opaque on every iteration:
+
+```rust
+#[inline(always)]
+pub fn dynamic_dispatch(
+    op: &dyn Operation,
+    mut x: i64,
+    iterations: u64,
+) -> i64 {
+    for _ in 0..iterations {
+        x = std::hint::black_box(op)
+            .apply(std::hint::black_box(x));
+    }
+
+    x
+}
+```
+
+A `&dyn Operation` is effectively a fat pointer containing:
 
 ```text
 data pointer
 vtable pointer
 ```
 
-On x86-64 System V, the effective arguments in this benchmark are:
+`black_box(op)` prevents the optimizer from carrying its knowledge of those values through the barrier.
 
-```text
-RDI = op.data
-RSI = op.vtable
-RDX = x
-RCX = iterations
-```
-
-The optimized hot loop is:
+The resulting hot loop looks approximately like:
 
 ```asm
-.LBB0_2:
-    mov     qword ptr [rsp + 16], r15
-    mov     qword ptr [rsp + 24], r14
+.Lloop:
+    mov     qword ptr [rsp + 8], r14
+    mov     qword ptr [rsp + 16], r12
 
-    # black_box(op) compiler barrier
+    # black_box(op)
 
-    mov     qword ptr [rsp + 8], rax
+    mov     qword ptr [rsp], rax
 
-    # black_box(x) compiler barrier
+    # black_box(x)
 
-    mov     rdi, qword ptr [rsp + 16]
-    mov     rax, qword ptr [rsp + 24]
-    mov     rsi, qword ptr [rsp + 8]
+    mov     rdi, qword ptr [rsp + 8]
+    mov     rax, qword ptr [rsp + 16]
+    mov     rsi, qword ptr [rsp]
     call    qword ptr [rax + 24]
-    dec     rbx
-    jne     .LBB0_2
+    dec     r15
+    jne     .Lloop
 ```
 
 The key instruction is:
@@ -309,106 +347,242 @@ The key instruction is:
 call qword ptr [rax + 24]
 ```
 
-At that point `rax` contains the vtable pointer. The call therefore reads the `Operation::apply` function pointer from the vtable and calls it indirectly.
+At that point `rax` contains the vtable pointer.
 
-`black_box(op)` is deliberately inside the loop. Without it, LLVM can hoist the vtable method pointer out of the loop and reduce the hot path to something like:
+The instruction therefore:
 
-```asm
-mov r15, qword ptr [vtable + 24]
+1. reads the method pointer stored at offset `24` in the vtable;
+2. performs an indirect call to that method.
 
-.loop:
-    call r15
-```
-
-That is a valid optimization, but it no longer measures the vtable lookup itself on every iteration. Making the trait object opaque each iteration keeps the benchmark focused on an actual vtable-based call.
-
-Similarly, `black_box(x)` prevents LLVM from recognizing the repeated `x + 1` operation and collapsing the entire loop into a single addition.
-
-## The called implementation
-
-The dynamically called `AddOne::apply` itself is extremely small:
+The called `AddOne::apply` then executes:
 
 ```asm
-lea     rax, [rsi + 1]
+lea rax, [rsi + 1]
 ret
 ```
 
-So the dynamic path performs a vtable lookup, an indirect call, the tiny operation, and a return on every iteration.
+So this path preserves a real runtime-selected call boundary.
 
-The static path can inline the same operation directly into the loop as:
+## Static vs devirtualized vs dynamic assembly
 
-```asm
-inc rax
-```
-
-That is the core of this experiment.
-
-## Static vs dynamic assembly
-
-Ignoring the compiler-barrier bookkeeping, the essential difference is:
+Ignoring the bookkeeping introduced by `black_box`, the essential difference is:
 
 ```text
-STATIC                           DYNAMIC
+STATIC                  DEVIRTUALIZED DYNAMIC       FORCED DYNAMIC
 
-inc rax                          call qword ptr [vtable + 24]
-                                     lea rax, [rsi + 1]
-                                     ret
+inc rax                 inc rax                     call [vtable + 24]
+                                                    lea rax, [rsi + 1]
+                                                    ret
 
-dec ...                          dec ...
-jne loop                         jne loop
+dec ...                 dec ...                     dec ...
+jne loop                jne loop                    jne loop
 ```
 
-Static dispatch allows `AddOne::apply` to become part of the caller. Dynamic dispatch preserves a runtime-selected function-call boundary and, in this version of the benchmark, performs the vtable method lookup on each iteration.
+The first two columns are the important result.
 
-The benchmark intentionally makes both `op` and `x` opaque inside the loop: `black_box(op)` prevents LLVM from hoisting the dynamic method pointer, while `black_box(x)` prevents it from algebraically eliminating the loop.
+At the Rust source level they are different:
 
-## A note about GOT calls
+```rust
+&T
+```
 
-The main crate calls the library function with assembly similar to:
+versus:
+
+```rust
+&dyn Operation
+```
+
+but after optimization they can become effectively identical machine code.
+
+The third version demonstrates what happens when the dynamic target cannot be propagated through the optimization barrier.
+
+## What `black_box` is doing
+
+`std::hint::black_box` is essential to this benchmark, but it is used for two different reasons.
+
+### `black_box(x)`
+
+All three versions make `x` opaque:
+
+```rust
+std::hint::black_box(x)
+```
+
+Without this, LLVM can recognize that the loop:
+
+```rust
+for _ in 0..iterations {
+    x = x + 1;
+}
+```
+
+is equivalent to:
+
+```rust
+x + iterations
+```
+
+and eliminate the billion iterations entirely.
+
+That would make the benchmark meaningless.
+
+The generated assembly commonly contains a pattern such as:
 
 ```asm
-call qword ptr [rip + dynamic_dispatch@GOTPCREL]
+mov qword ptr [rsp], r14
+#APP
+#NO_APP
+mov r14, qword ptr [rsp]
 ```
 
-This should **not** be confused with trait dynamic dispatch.
+The store and reload are generated as part of keeping the value opaque to the optimizer.
 
-`GOTPCREL` is normal ELF position-independent linking through the Global Offset Table.
+`#APP` and `#NO_APP` are assembler-output markers around inline assembly. They are not CPU instructions and do not themselves consume execution time.
 
-Semantically, the target is still the specific named function:
+### `black_box(op)`
+
+Only the forced dynamic version additionally does:
+
+```rust
+std::hint::black_box(op)
+```
+
+This serves a different purpose.
+
+Without it, the optimizer may retain enough information about the trait object to optimize the dispatch — potentially by devirtualizing it, or at least by moving invariant method lookup work out of the loop.
+
+With `black_box(op)`, the trait object's data pointer and vtable pointer are made opaque on every iteration, keeping the vtable-based dispatch visible in the generated hot loop.
+
+This means the forced-dynamic benchmark is not intended to measure the isolated latency of a single indirect `call` instruction.
+
+It measures the generated execution path when the dynamic target is deliberately kept opaque, including the bookkeeping required to preserve that opacity.
+
+## Why the devirtualized case matters
+
+A common simplified description is:
 
 ```text
-dynamic_dispatch
+generics / impl Trait  → static dispatch
+dyn Trait              → dynamic dispatch
 ```
 
-The actual trait dispatch occurs later, inside that function:
+That is correct at the Rust language level, but it does not necessarily describe the final machine code.
+
+Optimization can change:
+
+```text
+dyn Trait
+    ↓
+vtable call
+```
+
+into:
+
+```text
+dyn Trait
+    ↓
+concrete target proven
+    ↓
+devirtualization
+    ↓
+method inlining
+```
+
+The resulting machine code may therefore be indistinguishable from code written using static dispatch.
+
+This benchmark demonstrates both outcomes using the same trait and the same implementation.
+
+## A note about vtable layout
+
+For this build, the first trait method is reached at offset `24`:
 
 ```asm
 call qword ptr [rax + 24]
 ```
 
-This distinction is important when looking for dynamic dispatch in generated assembly.
+Conceptually, the observed vtable begins with metadata followed by the method pointer:
+
+```text
++0    drop-related entry
++8    size
++16   alignment
++24   Operation::apply
+```
+
+This is useful for understanding the generated assembly, but Rust's trait-object vtable layout is an implementation detail and should not be treated as a stable ABI.
+
+## A note about GOT calls
+
+You may also see assembly such as:
+
+```asm
+call qword ptr [rip + some_function@GOTPCREL]
+```
+
+This should **not** automatically be confused with trait dynamic dispatch.
+
+`GOTPCREL` is normal ELF position-independent linking through the Global Offset Table.
 
 For example:
 
 ```asm
-call qword ptr [rip + foo@GOTPCREL]
+call qword ptr [rip + dynamic_dispatch@GOTPCREL]
 ```
 
-is a call to a known symbol through linker indirection.
+still refers to the specific named function `dynamic_dispatch`.
 
-By contrast:
+By contrast, inside the forced-dynamic loop:
 
 ```asm
-call r15
+call qword ptr [rax + 24]
 ```
 
-or:
+uses a runtime-provided vtable pointer and selects the trait method through it.
 
-```asm
-call qword ptr [rbx + 24]
+That is the dispatch operation this benchmark is interested in.
+
+## Benchmark wrappers
+
+The benchmark functions are deliberately marked `#[inline(never)]`:
+
+```rust
+#[inline(never)]
+fn benchmark_static(op: &AddOne) -> (Duration, i64) {
+    let start = Instant::now();
+
+    let result = static_dispatch(op, 0, ITERATIONS);
+
+    (start.elapsed(), result)
+}
 ```
 
-can represent a runtime-selected call target.
+and equivalently for the other two cases.
+
+This creates convenient boundaries in the generated assembly:
+
+```text
+benchmark_static
+benchmark_dynamic_devirt
+benchmark_dynamic
+```
+
+while the dispatch functions themselves are `#[inline(always)]`.
+
+That combination is intentional:
+
+```text
+benchmark wrapper
+    #[inline(never)]
+        ↓
+stable assembly boundary
+
+dispatch implementation
+    #[inline(always)]
+        ↓
+optimizer can see it inside the wrapper
+```
+
+This makes it easier to inspect the effect of optimization without allowing the entire benchmark wrapper to disappear into `main`.
 
 ## Compiler version
 
@@ -421,13 +595,6 @@ rustc 1.98.1
 ```
 
 ## Generating the assembly
-
-The checked-in assembly examples are stored in:
-
-```text
-docs/assets/main.asm
-docs/assets/lib.asm
-```
 
 To generate Intel-syntax assembly for the library:
 
@@ -455,51 +622,18 @@ For example:
 find target/release/deps -name '*.s'
 ```
 
-The files in `docs/assets/` are copies of these generated assembly files, kept in the repository so the generated code can be inspected without rebuilding it.
-
-## Why two crates?
-
-Putting the dynamic function into a separate crate is important to the experiment.
-
-If LLVM can see both the caller and the concrete implementation, it may determine that the trait object can only contain `AddOne`.
-
-It can then **devirtualize** the call.
-
-In earlier experiments, LLVM was able to turn dynamic dispatch into a direct call when sufficient information was available.
-
-That would defeat the purpose of this benchmark.
-
-The workspace therefore disables LTO:
-
-```toml
-[profile.release]
-lto = false
-```
-
-and places `dynamic_dispatch` across the crate boundary.
-
-This keeps the dynamic dispatch genuinely dynamic.
-
-The static generic function behaves differently because Rust monomorphizes:
-
-```rust
-static_dispatch::<AddOne>
-```
-
-for the concrete type.
-
-The resulting specialized function is visible in the main crate's generated assembly.
+The files in `docs/assets/` are copies of generated assembly files so the generated code can be inspected without rebuilding the project.
 
 ## What this benchmark demonstrates
 
 This benchmark does **not** attempt to establish a universal performance ratio between static and dynamic dispatch.
 
-Instead, it demonstrates a specific optimization consequence of the two models.
+It demonstrates three optimization outcomes.
 
 With static dispatch:
 
 ```text
-generic function
+&T
     ↓
 monomorphization
     ↓
@@ -507,21 +641,51 @@ concrete implementation known
     ↓
 method inlining
     ↓
-inc rax
+inc
 ```
 
-With dynamic dispatch:
+With devirtualized dynamic dispatch:
 
 ```text
-dyn Trait
+&dyn Operation
+    ↓
+concrete trait-object origin visible
+    ↓
+devirtualization
+    ↓
+method inlining
+    ↓
+inc
+```
+
+With deliberately forced dynamic dispatch:
+
+```text
+&dyn Operation
+    ↓
+black_box(op)
+    ↓
+target kept opaque
     ↓
 vtable method slot
     ↓
 indirect call
     ↓
-separate AddOne::apply
+AddOne::apply
     ↓
 return
 ```
 
-For this deliberately tiny operation, the difference is especially visible because the useful
+The main result is therefore not simply:
+
+> static dispatch is faster than dynamic dispatch.
+
+The more interesting result is:
+
+> **`dyn Trait` is a source-level dispatch mechanism, not a guarantee that an indirect call will survive optimization.**
+
+When the compiler can prove the concrete target, dynamic dispatch can disappear completely.
+
+When it cannot, the generated code retains the vtable lookup and indirect call.
+
+For a deliberately tiny operation such as `x + 1`, that difference is especially easy to see.
