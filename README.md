@@ -45,11 +45,11 @@ On the test machine, the resulting benchmark is approximately:
 ```text
 Iterations: 1000000000
 
-run 1: static =  229.930 ms | dynamic = 1062.659 ms | dynamic/static = 4.62x
-run 2: static =  216.697 ms | dynamic = 1069.777 ms | dynamic/static = 4.94x
-run 3: static =  216.435 ms | dynamic = 1063.844 ms | dynamic/static = 4.92x
-run 4: static =  215.065 ms | dynamic = 1062.438 ms | dynamic/static = 4.94x
-run 5: static =  216.695 ms | dynamic = 1070.522 ms | dynamic/static = 4.94x
+run 1: static =  222.351 ms | devirt =  218.035 | dynamic = 1077.909 ms | dynamic/static = 4.85x
+run 2: static =  239.876 ms | devirt =  218.814 | dynamic = 1064.655 ms | dynamic/static = 4.44x
+run 3: static =  216.702 ms | devirt =  218.801 | dynamic = 1069.115 ms | dynamic/static = 4.93x
+run 4: static =  218.246 ms | devirt =  217.251 | dynamic = 1079.808 ms | dynamic/static = 4.95x
+run 5: static =  218.090 ms | devirt =  219.331 | dynamic = 1056.841 ms | dynamic/static = 4.85x
 ```
 
 In this experiment, dynamic dispatch is therefore roughly **4.9× slower** than the statically dispatched and inlined version.

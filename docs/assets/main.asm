@@ -1,29 +1,5 @@
 	.intel_syntax noprefix
 	.file	"devirtualization_test_main.bf5669205f1998ef-cgu.0"
-	.section	.text._RINvCs85WuWpnC3RJ_25devirtualization_test_lib15static_dispatchNtB2_6AddOneECsgqu5hhwAJIh_26devirtualization_test_main,"ax",@progbits
-	.p2align	4
-	.type	_RINvCs85WuWpnC3RJ_25devirtualization_test_lib15static_dispatchNtB2_6AddOneECsgqu5hhwAJIh_26devirtualization_test_main,@function
-_RINvCs85WuWpnC3RJ_25devirtualization_test_lib15static_dispatchNtB2_6AddOneECsgqu5hhwAJIh_26devirtualization_test_main:
-	.cfi_startproc
-	mov	rax, rdi
-	test	rsi, rsi
-	je	.LBB0_3
-	lea	rcx, [rsp - 8]
-	.p2align	4
-.LBB0_2:
-	mov	qword ptr [rsp - 8], rax
-	#APP
-	#NO_APP
-	mov	rax, qword ptr [rsp - 8]
-	inc	rax
-	dec	rsi
-	jne	.LBB0_2
-.LBB0_3:
-	ret
-.Lfunc_end0:
-	.size	_RINvCs85WuWpnC3RJ_25devirtualization_test_lib15static_dispatchNtB2_6AddOneECsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end0-_RINvCs85WuWpnC3RJ_25devirtualization_test_lib15static_dispatchNtB2_6AddOneECsgqu5hhwAJIh_26devirtualization_test_main
-	.cfi_endproc
-
 	.section	.text._RINvNtCs9k3SxhrAWiO_3std2rt10lang_startuECsgqu5hhwAJIh_26devirtualization_test_main,"ax",@progbits
 	.hidden	_RINvNtCs9k3SxhrAWiO_3std2rt10lang_startuECsgqu5hhwAJIh_26devirtualization_test_main
 	.globl	_RINvNtCs9k3SxhrAWiO_3std2rt10lang_startuECsgqu5hhwAJIh_26devirtualization_test_main
@@ -43,8 +19,8 @@ _RINvNtCs9k3SxhrAWiO_3std2rt10lang_startuECsgqu5hhwAJIh_26devirtualization_test_
 	pop	rcx
 	.cfi_def_cfa_offset 8
 	ret
-.Lfunc_end1:
-	.size	_RINvNtCs9k3SxhrAWiO_3std2rt10lang_startuECsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end1-_RINvNtCs9k3SxhrAWiO_3std2rt10lang_startuECsgqu5hhwAJIh_26devirtualization_test_main
+.Lfunc_end0:
+	.size	_RINvNtCs9k3SxhrAWiO_3std2rt10lang_startuECsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end0-_RINvNtCs9k3SxhrAWiO_3std2rt10lang_startuECsgqu5hhwAJIh_26devirtualization_test_main
 	.cfi_endproc
 
 	.section	.text.unlikely._RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtualization_test_main,"ax",@progbits
@@ -57,7 +33,6 @@ _RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtuali
 	mov	qword ptr [rax], rdi
 	lea	rcx, [rsp + 32]
 	mov	qword ptr [rcx], rsi
-	lea	rdx, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.7]
 	mov	qword ptr [rsp + 8], rdx
 	lea	rdx, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.1]
 	xor	edi, edi
@@ -65,8 +40,8 @@ _RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtuali
 	mov	r8, rdx
 	xor	r9d, r9d
 	call	qword ptr [rip + _RNvNtCsgxBkk5gSRhY_4core9panicking19assert_failed_inner@GOTPCREL]
-.Lfunc_end2:
-	.size	_RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end2-_RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtualization_test_main
+.Lfunc_end1:
+	.size	_RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end1-_RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtualization_test_main
 	.cfi_endproc
 
 	.section	.text._RINvNtNtCs9k3SxhrAWiO_3std3sys9backtrace28___rust_begin_short_backtraceFEuuECsgqu5hhwAJIh_26devirtualization_test_main,"ax",@progbits
@@ -82,8 +57,8 @@ _RINvNtNtCs9k3SxhrAWiO_3std3sys9backtrace28___rust_begin_short_backtraceFEuuECsg
 	pop	rax
 	.cfi_def_cfa_offset 8
 	ret
-.Lfunc_end3:
-	.size	_RINvNtNtCs9k3SxhrAWiO_3std3sys9backtrace28___rust_begin_short_backtraceFEuuECsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end3-_RINvNtNtCs9k3SxhrAWiO_3std3sys9backtrace28___rust_begin_short_backtraceFEuuECsgqu5hhwAJIh_26devirtualization_test_main
+.Lfunc_end2:
+	.size	_RINvNtNtCs9k3SxhrAWiO_3std3sys9backtrace28___rust_begin_short_backtraceFEuuECsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end2-_RINvNtNtCs9k3SxhrAWiO_3std3sys9backtrace28___rust_begin_short_backtraceFEuuECsgqu5hhwAJIh_26devirtualization_test_main
 	.cfi_endproc
 
 	.section	.text._RNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0Csgqu5hhwAJIh_26devirtualization_test_main,"ax",@progbits
@@ -99,8 +74,8 @@ _RNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0Csgqu5hhwAJIh_26devirtualization_te
 	pop	rcx
 	.cfi_def_cfa_offset 8
 	ret
-.Lfunc_end4:
-	.size	_RNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0Csgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end4-_RNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0Csgqu5hhwAJIh_26devirtualization_test_main
+.Lfunc_end3:
+	.size	_RNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0Csgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end3-_RNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0Csgqu5hhwAJIh_26devirtualization_test_main
 	.cfi_endproc
 
 	.section	.text._RNSNvYNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0INtNtNtCsgxBkk5gSRhY_4core3ops8function6FnOnceuE9call_once6vtableCsgqu5hhwAJIh_26devirtualization_test_main,"ax",@progbits
@@ -116,8 +91,8 @@ _RNSNvYNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0INtNtNtCsgxBkk5gSRhY_4core3ops
 	pop	rcx
 	.cfi_def_cfa_offset 8
 	ret
-.Lfunc_end5:
-	.size	_RNSNvYNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0INtNtNtCsgxBkk5gSRhY_4core3ops8function6FnOnceuE9call_once6vtableCsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end5-_RNSNvYNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0INtNtNtCsgxBkk5gSRhY_4core3ops8function6FnOnceuE9call_once6vtableCsgqu5hhwAJIh_26devirtualization_test_main
+.Lfunc_end4:
+	.size	_RNSNvYNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0INtNtNtCsgxBkk5gSRhY_4core3ops8function6FnOnceuE9call_once6vtableCsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end4-_RNSNvYNCINvNtCs9k3SxhrAWiO_3std2rt10lang_startuE0INtNtNtCsgxBkk5gSRhY_4core3ops8function6FnOnceuE9call_once6vtableCsgqu5hhwAJIh_26devirtualization_test_main
 	.cfi_endproc
 
 	.section	.text._RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static,"ax",@progbits
@@ -129,49 +104,40 @@ _RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static:
 	.cfi_def_cfa_offset 16
 	push	rbx
 	.cfi_def_cfa_offset 24
-	sub	rsp, 40
-	.cfi_def_cfa_offset 64
+	sub	rsp, 24
+	.cfi_def_cfa_offset 48
 	.cfi_offset rbx, -24
 	.cfi_offset r14, -16
-	mov	r14, rsi
 	mov	rbx, rdi
 	call	qword ptr [rip + _RNvMNtCs9k3SxhrAWiO_3std4timeNtB2_7Instant3now@GOTPCREL]
-	mov	qword ptr [rsp + 24], rax
-	mov	dword ptr [rsp + 32], edx
-	mov	qword ptr [rsp + 16], r14
-	lea	rax, [rsp + 16]
+	mov	qword ptr [rsp + 8], rax
+	mov	dword ptr [rsp + 16], edx
+	mov	eax, 1000000000
+	xor	r14d, r14d
+	mov	rcx, rsp
+	.p2align	4
+.LBB5_1:
+	mov	qword ptr [rsp], r14
 	#APP
 	#NO_APP
-	mov	qword ptr [rsp + 8], 0
-	lea	rax, [rsp + 8]
-	#APP
-	#NO_APP
-	mov	qword ptr [rsp], 1000000000
-	mov	rax, rsp
-	#APP
-	#NO_APP
-	mov	rdi, qword ptr [rsp + 8]
-	mov	rsi, qword ptr [rsp]
-	call	_RINvCs85WuWpnC3RJ_25devirtualization_test_lib15static_dispatchNtB2_6AddOneECsgqu5hhwAJIh_26devirtualization_test_main
-	mov	qword ptr [rsp], rax
-	mov	rax, rsp
-	#APP
-	#NO_APP
-	lea	rdi, [rsp + 24]
+	mov	r14, qword ptr [rsp]
+	inc	r14
+	dec	rax
+	jne	.LBB5_1
+	lea	rdi, [rsp + 8]
 	call	qword ptr [rip + _RNvMNtCs9k3SxhrAWiO_3std4timeNtB2_7Instant7elapsed@GOTPCREL]
 	mov	qword ptr [rbx], rax
 	mov	dword ptr [rbx + 8], edx
-	mov	rax, qword ptr [rsp]
-	mov	qword ptr [rbx + 16], rax
-	add	rsp, 40
+	mov	qword ptr [rbx + 16], r14
+	add	rsp, 24
 	.cfi_def_cfa_offset 24
 	pop	rbx
 	.cfi_def_cfa_offset 16
 	pop	r14
 	.cfi_def_cfa_offset 8
 	ret
-.Lfunc_end6:
-	.size	_RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static, .Lfunc_end6-_RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static
+.Lfunc_end5:
+	.size	_RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static, .Lfunc_end5-_RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static
 	.cfi_endproc
 
 	.section	.text._RNvCsgqu5hhwAJIh_26devirtualization_test_main17benchmark_dynamic,"ax",@progbits
@@ -179,79 +145,106 @@ _RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static:
 	.type	_RNvCsgqu5hhwAJIh_26devirtualization_test_main17benchmark_dynamic,@function
 _RNvCsgqu5hhwAJIh_26devirtualization_test_main17benchmark_dynamic:
 	.cfi_startproc
-	push	r14
+	push	rbp
 	.cfi_def_cfa_offset 16
-	push	rbx
+	push	r15
 	.cfi_def_cfa_offset 24
-	sub	rsp, 56
-	.cfi_def_cfa_offset 80
-	.cfi_offset rbx, -24
-	.cfi_offset r14, -16
+	push	r14
+	.cfi_def_cfa_offset 32
+	push	r13
+	.cfi_def_cfa_offset 40
+	push	r12
+	.cfi_def_cfa_offset 48
+	push	rbx
+	.cfi_def_cfa_offset 56
+	sub	rsp, 40
+	.cfi_def_cfa_offset 96
+	.cfi_offset rbx, -56
+	.cfi_offset r12, -48
+	.cfi_offset r13, -40
+	.cfi_offset r14, -32
+	.cfi_offset r15, -24
+	.cfi_offset rbp, -16
 	mov	r14, rsi
 	mov	rbx, rdi
 	call	qword ptr [rip + _RNvMNtCs9k3SxhrAWiO_3std4timeNtB2_7Instant3now@GOTPCREL]
-	mov	qword ptr [rsp + 40], rax
-	mov	dword ptr [rsp + 48], edx
-	mov	qword ptr [rsp + 24], r14
-	lea	rax, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.2]
-	mov	qword ptr [rsp + 32], rax
-	lea	rax, [rsp + 24]
+	mov	qword ptr [rsp + 24], rax
+	mov	dword ptr [rsp + 32], edx
+	mov	r15d, 1000000000
+	xor	eax, eax
+	lea	r12, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.2]
+	lea	r13, [rsp + 8]
+	mov	rbp, rsp
+	.p2align	4
+.LBB6_1:
+	mov	qword ptr [rsp + 8], r14
+	mov	qword ptr [rsp + 16], r12
 	#APP
 	#NO_APP
-	mov	qword ptr [rsp + 16], 0
-	lea	rax, [rsp + 16]
+	mov	qword ptr [rsp], rax
 	#APP
 	#NO_APP
-	mov	qword ptr [rsp + 8], 1000000000
-	lea	rax, [rsp + 8]
-	#APP
-	#NO_APP
-	mov	rdi, qword ptr [rsp + 24]
-	mov	rsi, qword ptr [rsp + 32]
-	mov	rdx, qword ptr [rsp + 16]
-	mov	rcx, qword ptr [rsp + 8]
-	call	qword ptr [rip + _RNvCs85WuWpnC3RJ_25devirtualization_test_lib16dynamic_dispatch@GOTPCREL]
-	mov	qword ptr [rsp + 8], rax
-	lea	rax, [rsp + 8]
-	#APP
-	#NO_APP
-	lea	rdi, [rsp + 40]
+	mov	rdi, qword ptr [rsp + 8]
+	mov	rax, qword ptr [rsp + 16]
+	mov	rsi, qword ptr [rsp]
+	call	qword ptr [rax + 24]
+	dec	r15
+	jne	.LBB6_1
+	lea	rdi, [rsp + 24]
+	mov	r14, rax
 	call	qword ptr [rip + _RNvMNtCs9k3SxhrAWiO_3std4timeNtB2_7Instant7elapsed@GOTPCREL]
 	mov	qword ptr [rbx], rax
 	mov	dword ptr [rbx + 8], edx
-	mov	rax, qword ptr [rsp + 8]
-	mov	qword ptr [rbx + 16], rax
-	add	rsp, 56
-	.cfi_def_cfa_offset 24
+	mov	qword ptr [rbx + 16], r14
+	add	rsp, 40
+	.cfi_def_cfa_offset 56
 	pop	rbx
-	.cfi_def_cfa_offset 16
+	.cfi_def_cfa_offset 48
+	pop	r12
+	.cfi_def_cfa_offset 40
+	pop	r13
+	.cfi_def_cfa_offset 32
 	pop	r14
+	.cfi_def_cfa_offset 24
+	pop	r15
+	.cfi_def_cfa_offset 16
+	pop	rbp
 	.cfi_def_cfa_offset 8
 	ret
-.Lfunc_end7:
-	.size	_RNvCsgqu5hhwAJIh_26devirtualization_test_main17benchmark_dynamic, .Lfunc_end7-_RNvCsgqu5hhwAJIh_26devirtualization_test_main17benchmark_dynamic
+.Lfunc_end6:
+	.size	_RNvCsgqu5hhwAJIh_26devirtualization_test_main17benchmark_dynamic, .Lfunc_end6-_RNvCsgqu5hhwAJIh_26devirtualization_test_main17benchmark_dynamic
 	.cfi_endproc
 
 	.section	.rodata.cst16,"aM",@progbits,16
 	.p2align	4, 0x0
-.LCPI8_0:
+.LCPI7_0:
 	.quad	4294967295
 	.quad	4294967295
-.LCPI8_1:
+.LCPI7_1:
 	.quad	4841369599423283200
 	.quad	4841369599423283200
-.LCPI8_2:
+.LCPI7_2:
 	.quad	4985484787499139072
 	.quad	4985484787499139072
-.LCPI8_3:
+.LCPI7_3:
 	.quad	0x4530000000100000
 	.quad	0x4530000000100000
-.LCPI8_4:
+.LCPI7_4:
+	.long	1127219200
+	.long	1160773632
+	.long	0
+	.long	0
+.LCPI7_5:
+	.quad	0x4330000000000000
+	.quad	0x4530000000000000
+.LCPI7_8:
 	.quad	0x41cdcd6500000000
 	.quad	0x41cdcd6500000000
 	.section	.rodata.cst8,"aM",@progbits,8
 	.p2align	3, 0x0
-.LCPI8_5:
+.LCPI7_6:
+	.quad	0x41cdcd6500000000
+.LCPI7_7:
 	.quad	0x408f400000000000
 	.section	.text._RNvCsgqu5hhwAJIh_26devirtualization_test_main4main,"ax",@progbits
 	.hidden	_RNvCsgqu5hhwAJIh_26devirtualization_test_main4main
@@ -272,8 +265,8 @@ _RNvCsgqu5hhwAJIh_26devirtualization_test_main4main:
 	.cfi_def_cfa_offset 48
 	push	rbx
 	.cfi_def_cfa_offset 56
-	sub	rsp, 136
-	.cfi_def_cfa_offset 192
+	sub	rsp, 184
+	.cfi_def_cfa_offset 240
 	.cfi_offset rbx, -56
 	.cfi_offset r12, -48
 	.cfi_offset r13, -40
@@ -285,85 +278,111 @@ _RNvCsgqu5hhwAJIh_26devirtualization_test_main4main:
 	mov	rax, qword ptr [rip + _RNvXsd_NtNtNtCsgxBkk5gSRhY_4core3fmt3num3impyNtB9_7Display3fmt@GOTPCREL]
 	mov	qword ptr [rsp + 24], rax
 	lea	rdi, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.4]
-	mov	r14, qword ptr [rip + _RNvNtNtCs9k3SxhrAWiO_3std2io5stdio6__print@GOTPCREL]
-	lea	r12, [rsp + 16]
-	mov	rsi, r12
-	call	r14
+	mov	rbx, qword ptr [rip + _RNvNtNtCs9k3SxhrAWiO_3std2io5stdio6__print@GOTPCREL]
+	lea	rsi, [rsp + 16]
+	call	rbx
 	lea	rdi, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.5]
 	mov	esi, 3
-	call	r14
-	mov	r13d, 1
+	call	rbx
+	mov	eax, 1
 	.p2align	4
-.LBB8_1:
-	mov	qword ptr [rsp + 88], r13
-	mov	rdi, r12
-	lea	rbx, [rsp + 15]
-	mov	rsi, rbx
+.LBB7_1:
+	lea	r13, [rax + 1]
+	cmp	rax, 5
+	cmove	r13, rax
+	mov	qword ptr [rsp + 96], rax
+	mov	qword ptr [rsp + 104], rax
+	lea	r14, [rsp + 16]
+	mov	rdi, r14
 	call	_RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static
-	mov	r14, qword ptr [rsp + 16]
+	mov	rbx, qword ptr [rsp + 16]
 	mov	r15d, dword ptr [rsp + 24]
 	mov	rbp, qword ptr [rsp + 32]
-	mov	qword ptr [rsp + 96], rbp
-	mov	rdi, r12
-	mov	rsi, rbx
+	mov	qword ptr [rsp + 8], rbp
+	mov	rdi, r14
+	lea	rsi, [rsp + 7]
 	call	_RNvCsgqu5hhwAJIh_26devirtualization_test_main17benchmark_dynamic
-	movdqa	xmm0, xmmword ptr [rsp + 16]
+	movaps	xmm0, xmmword ptr [rsp + 16]
+	movaps	xmmword ptr [rsp + 160], xmm0
+	mov	r12d, dword ptr [rsp + 24]
+	mov	r14, qword ptr [rsp + 32]
+	mov	qword ptr [rsp + 112], r14
+	lea	rdi, [rsp + 16]
+	call	_RNvCsgqu5hhwAJIh_26devirtualization_test_main16benchmark_static
+	mov	rcx, qword ptr [rsp + 16]
 	mov	eax, dword ptr [rsp + 24]
-	mov	rcx, qword ptr [rsp + 32]
-	mov	qword ptr [rsp + 104], rcx
-	cmp	rbp, rcx
-	jne	.LBB8_5
-	lea	rbp, [r13 + 1]
-	movq	xmm1, r14
-	punpcklqdq	xmm0, xmm1
-	movdqa	xmm1, xmm0
-	pand	xmm1, xmmword ptr [rip + .LCPI8_0]
-	por	xmm1, xmmword ptr [rip + .LCPI8_1]
-	psrlq	xmm0, 32
-	por	xmm0, xmmword ptr [rip + .LCPI8_2]
-	subpd	xmm0, xmmword ptr [rip + .LCPI8_3]
-	xorps	xmm2, xmm2
-	cvtsi2sd	xmm2, r15d
-	addpd	xmm0, xmm1
+	mov	rdx, qword ptr [rsp + 32]
+	mov	qword ptr [rsp + 120], rdx
+	cmp	rbp, r14
+	jne	.LBB7_6
+	cmp	rbp, rdx
+	jne	.LBB7_7
+	movq	xmm0, rbx
+	movdqa	xmm4, xmmword ptr [rsp + 160]
+	punpcklqdq	xmm4, xmm0
+	movdqa	xmm0, xmm4
+	pand	xmm0, xmmword ptr [rip + .LCPI7_0]
+	por	xmm0, xmmword ptr [rip + .LCPI7_1]
+	psrlq	xmm4, 32
+	por	xmm4, xmmword ptr [rip + .LCPI7_2]
+	subpd	xmm4, xmmword ptr [rip + .LCPI7_3]
+	addpd	xmm4, xmm0
+	xorps	xmm0, xmm0
+	cvtsi2sd	xmm0, r15d
+	movq	xmm1, rcx
+	punpckldq	xmm1, xmmword ptr [rip + .LCPI7_4]
+	subpd	xmm1, xmmword ptr [rip + .LCPI7_5]
+	movapd	xmm2, xmm1
+	unpckhpd	xmm2, xmm1
+	addsd	xmm2, xmm1
 	xorps	xmm1, xmm1
 	cvtsi2sd	xmm1, eax
-	unpcklpd	xmm1, xmm2
-	divpd	xmm1, xmmword ptr [rip + .LCPI8_4]
-	addpd	xmm1, xmm0
-	movapd	xmm0, xmm1
-	unpckhpd	xmm0, xmm1
-	movapd	xmm2, xmm1
-	divsd	xmm1, xmm0
-	movsd	xmm3, qword ptr [rip + .LCPI8_5]
+	divsd	xmm1, qword ptr [rip + .LCPI7_6]
+	addsd	xmm1, xmm2
+	movsd	xmm3, qword ptr [rip + .LCPI7_7]
+	mulsd	xmm1, xmm3
+	xorps	xmm2, xmm2
+	cvtsi2sd	xmm2, r12d
+	movsd	qword ptr [rsp + 136], xmm1
+	unpcklpd	xmm2, xmm0
+	divpd	xmm2, xmmword ptr [rip + .LCPI7_8]
+	addpd	xmm2, xmm4
+	movapd	xmm0, xmm2
+	unpckhpd	xmm0, xmm2
+	movapd	xmm1, xmm2
+	divsd	xmm2, xmm0
 	mulsd	xmm0, xmm3
-	movsd	qword ptr [rsp + 112], xmm0
-	mulsd	xmm2, xmm3
-	movsd	qword ptr [rsp + 120], xmm2
-	movsd	qword ptr [rsp + 128], xmm1
-	lea	rax, [rsp + 88]
+	movsd	qword ptr [rsp + 128], xmm0
+	mulsd	xmm1, xmm3
+	movsd	qword ptr [rsp + 144], xmm1
+	movsd	qword ptr [rsp + 152], xmm2
+	lea	rax, [rsp + 104]
 	mov	qword ptr [rsp + 16], rax
 	mov	rax, qword ptr [rip + _RNvXsi_NtNtNtCsgxBkk5gSRhY_4core3fmt3num3impjNtB9_7Display3fmt@GOTPCREL]
 	mov	qword ptr [rsp + 24], rax
-	lea	rax, [rsp + 112]
+	lea	rax, [rsp + 128]
 	mov	qword ptr [rsp + 32], rax
 	mov	rax, qword ptr [rip + _RNvXs7_NtNtCsgxBkk5gSRhY_4core3fmt5floatdNtB7_7Display3fmt@GOTPCREL]
 	mov	qword ptr [rsp + 40], rax
-	lea	rcx, [rsp + 120]
+	lea	rcx, [rsp + 136]
 	mov	qword ptr [rsp + 48], rcx
 	mov	qword ptr [rsp + 56], rax
-	lea	rcx, [rsp + 128]
+	lea	rcx, [rsp + 144]
 	mov	qword ptr [rsp + 64], rcx
 	mov	qword ptr [rsp + 72], rax
-	lea	rdi, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.8]
-	mov	rsi, r12
+	lea	rcx, [rsp + 152]
+	mov	qword ptr [rsp + 80], rcx
+	mov	qword ptr [rsp + 88], rax
+	lea	rdi, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.9]
+	lea	rsi, [rsp + 16]
 	call	qword ptr [rip + _RNvNtNtCs9k3SxhrAWiO_3std2io5stdio6__print@GOTPCREL]
+	cmp	qword ptr [rsp + 96], 5
+	je	.LBB7_5
+	mov	rax, r13
 	cmp	r13, 5
-	cmovne	r13, rbp
-	je	.LBB8_4
-	cmp	r13, 5
-	jbe	.LBB8_1
-.LBB8_4:
-	add	rsp, 136
+	jbe	.LBB7_1
+.LBB7_5:
+	add	rsp, 184
 	.cfi_def_cfa_offset 56
 	pop	rbx
 	.cfi_def_cfa_offset 48
@@ -378,13 +397,19 @@ _RNvCsgqu5hhwAJIh_26devirtualization_test_main4main:
 	pop	rbp
 	.cfi_def_cfa_offset 8
 	ret
-.LBB8_5:
-	.cfi_def_cfa_offset 192
-	lea	rdi, [rsp + 96]
-	lea	rsi, [rsp + 104]
+.LBB7_6:
+	.cfi_def_cfa_offset 240
+	lea	rdx, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.7]
+	lea	rdi, [rsp + 8]
+	lea	rsi, [rsp + 112]
 	call	_RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtualization_test_main
-.Lfunc_end8:
-	.size	_RNvCsgqu5hhwAJIh_26devirtualization_test_main4main, .Lfunc_end8-_RNvCsgqu5hhwAJIh_26devirtualization_test_main4main
+.LBB7_7:
+	lea	rdx, [rip + .Lanon.28ec369c4c5b3c2b396c0c8054611a41.8]
+	lea	rdi, [rsp + 8]
+	lea	rsi, [rsp + 120]
+	call	_RINvNtCsgxBkk5gSRhY_4core9panicking13assert_failedxxECsgqu5hhwAJIh_26devirtualization_test_main
+.Lfunc_end7:
+	.size	_RNvCsgqu5hhwAJIh_26devirtualization_test_main4main, .Lfunc_end7-_RNvCsgqu5hhwAJIh_26devirtualization_test_main4main
 	.cfi_endproc
 
 	.section	.text._RNvXCs85WuWpnC3RJ_25devirtualization_test_libNtB2_6AddOneNtB2_9Operation5apply,"ax",@progbits
@@ -394,8 +419,8 @@ _RNvXCs85WuWpnC3RJ_25devirtualization_test_libNtB2_6AddOneNtB2_9Operation5apply:
 	.cfi_startproc
 	lea	rax, [rsi + 1]
 	ret
-.Lfunc_end9:
-	.size	_RNvXCs85WuWpnC3RJ_25devirtualization_test_libNtB2_6AddOneNtB2_9Operation5apply, .Lfunc_end9-_RNvXCs85WuWpnC3RJ_25devirtualization_test_libNtB2_6AddOneNtB2_9Operation5apply
+.Lfunc_end8:
+	.size	_RNvXCs85WuWpnC3RJ_25devirtualization_test_libNtB2_6AddOneNtB2_9Operation5apply, .Lfunc_end8-_RNvXCs85WuWpnC3RJ_25devirtualization_test_libNtB2_6AddOneNtB2_9Operation5apply
 	.cfi_endproc
 
 	.section	.text._RNvXs1g_NtCsgxBkk5gSRhY_4core3fmtRxNtB6_5Debug3fmtCsgqu5hhwAJIh_26devirtualization_test_main,"ax",@progbits
@@ -406,16 +431,16 @@ _RNvXs1g_NtCsgxBkk5gSRhY_4core3fmtRxNtB6_5Debug3fmtCsgqu5hhwAJIh_26devirtualizat
 	mov	rdi, qword ptr [rdi]
 	mov	eax, dword ptr [rsi + 16]
 	test	eax, 33554432
-	jne	.LBB10_3
+	jne	.LBB9_3
 	test	eax, 67108864
-	jne	.LBB10_2
+	jne	.LBB9_2
 	jmp	qword ptr [rip + _RNvXse_NtNtNtCsgxBkk5gSRhY_4core3fmt3num3impxNtB9_7Display3fmt@GOTPCREL]
-.LBB10_3:
+.LBB9_3:
 	jmp	qword ptr [rip + _RNvXsD_NtNtCsgxBkk5gSRhY_4core3fmt3numxNtB7_8LowerHex3fmt@GOTPCREL]
-.LBB10_2:
+.LBB9_2:
 	jmp	qword ptr [rip + _RNvXsF_NtNtCsgxBkk5gSRhY_4core3fmt3numxNtB7_8UpperHex3fmt@GOTPCREL]
-.Lfunc_end10:
-	.size	_RNvXs1g_NtCsgxBkk5gSRhY_4core3fmtRxNtB6_5Debug3fmtCsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end10-_RNvXs1g_NtCsgxBkk5gSRhY_4core3fmtRxNtB6_5Debug3fmtCsgqu5hhwAJIh_26devirtualization_test_main
+.Lfunc_end9:
+	.size	_RNvXs1g_NtCsgxBkk5gSRhY_4core3fmtRxNtB6_5Debug3fmtCsgqu5hhwAJIh_26devirtualization_test_main, .Lfunc_end9-_RNvXs1g_NtCsgxBkk5gSRhY_4core3fmtRxNtB6_5Debug3fmtCsgqu5hhwAJIh_26devirtualization_test_main
 	.cfi_endproc
 
 	.section	.text.main,"ax",@progbits
@@ -437,8 +462,8 @@ main:
 	pop	rcx
 	.cfi_def_cfa_offset 8
 	ret
-.Lfunc_end11:
-	.size	main, .Lfunc_end11-main
+.Lfunc_end10:
+	.size	main, .Lfunc_end10-main
 	.cfi_endproc
 
 	.type	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.0,@object
@@ -497,14 +522,22 @@ main:
 	.p2align	3, 0x0
 .Lanon.28ec369c4c5b3c2b396c0c8054611a41.7:
 	.quad	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.6
-	.asciz	"\026\000\000\000\000\000\000\000.\000\000\000\t\000\000"
+	.asciz	"\026\000\000\000\000\000\000\0000\000\000\000\t\000\000"
 	.size	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.7, 24
 
 	.type	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.8,@object
-	.section	.rodata..Lanon.28ec369c4c5b3c2b396c0c8054611a41.8,"a",@progbits
+	.section	.data.rel.ro..Lanon.28ec369c4c5b3c2b396c0c8054611a41.8,"aw",@progbits
+	.p2align	3, 0x0
 .Lanon.28ec369c4c5b3c2b396c0c8054611a41.8:
-	.asciz	"\004run \300\013: static = \307 \000\000x\b\000\003\000\020 ms | dynamic = \307 \000\000x\b\000\003\000\027 ms | dynamic/static = \305 \000\000p\002\000\002x\n"
-	.size	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.8, 88
+	.quad	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.6
+	.asciz	"\026\000\000\000\000\000\000\0001\000\000\000\t\000\000"
+	.size	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.8, 24
+
+	.type	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.9,@object
+	.section	.rodata..Lanon.28ec369c4c5b3c2b396c0c8054611a41.9,"a",@progbits
+.Lanon.28ec369c4c5b3c2b396c0c8054611a41.9:
+	.asciz	"\004run \300\013: static = \307 \000\000x\b\000\003\000\017 ms | devirt = \307 \000\000x\b\000\003\000\r | dynamic = \307 \000\000x\b\000\003\000\027 ms | dynamic/static = \305 \000\000p\002\000\002x\n"
+	.size	.Lanon.28ec369c4c5b3c2b396c0c8054611a41.9, 110
 
 	.ident	"rustc version 1.98.1 (48a229cea 2026-09-01)"
 	.section	".note.GNU-stack","",@progbits
